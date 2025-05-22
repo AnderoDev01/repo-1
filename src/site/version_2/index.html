@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resumidor Ollama Pro ✨</title>
+  <meta name="description" content="App de processamento inteligente de texto local ou via API, super customizável.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚀</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --color-primary: #6366f1;
+      --color-primary-dark: #4f46e5;
+      --color-primary-light: #8b5cf6;
+      --color-secondary: #06b6d4;
+      --color-secondary-dark: #0891b2;
+      --color-accent: #f59e0b;
+      --color-success: #10b981;
+      --color-warning: #f59e0b;
+      --color-error: #ef4444;
+      --color-background: #f8fafc;
+      --color-surface: #ffffff;
+      --color-surface-variant: #f1f5f9;
+      --color-border: #e2e8f0;
+      --color-border-light: #f1f5f9;
+      --color-text-primary: #1e293b;
+      --color-text-secondary: #64748b;
+      --color-text-muted: #94a3b8;
+      --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+      --border-radius: 1rem;
+      --border-radius-sm: 0.5rem;
+      --border-radius-lg: 1.5rem;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.06), 0 2px 4px -2px rgb(0 0 0 / 0.06);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.07), 0 4px 6px -4px rgb(0 0 0 / 0.07);
+      --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.08), 0 8px 10px -6px rgb(0 0 0 / 0.08);
+      --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      --spacing-xs: 0.25rem;
+      --spacing-sm: 0.5rem;
+      --spacing-md: 1rem;
+      --spacing-lg: 1.5rem;
+      --spacing-xl: 2rem;
+      --spacing-2xl: 3rem;
+    }
+
+    .dark-mode {
+      --color-background: #111827;
+      --color-surface: #1f2937;
+      --color-surface-variant: #374151;
+      --color-border: #4b5563;
+      --color-border-light: #374151;
+      --color-text-primary: #f3f4f6;
+      --color-text-secondary: #9ca3af;
+      --color-text-muted: #6b7280;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--color-background); color: var(--color-text-primary);
+      font-family: var(--font-family); min-height: 100vh; line-height: 1.6;
+      transition: background var(--transition), color var(--transition);
+    }
+
+    main.page-container {
+      max-width: 900px; margin: 0 auto; padding: var(--spacing-xl) var(--spacing-lg);
+      display: grid; gap: var(--spacing-lg);
+    }
+
+    header.header { text-align: center; margin-bottom: var(--spacing-xl); }
+    .header h1 {
+      font-size: 2.75rem; font-weight: 700;
+      background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      margin-bottom: var(--spacing-xs); letter-spacing: -0.025em;
+    }
+    .header .subtitle { color: var(--color-text-secondary); font-size: 1.05rem; font-weight: 400; }
+
+    .welcome-message {
+      background: var(--color-surface-variant); border-radius: var(--border-radius-sm);
+      padding: var(--spacing-md); text-align: center; margin-bottom: var(--spacing-lg);
+      color: var(--color-text-secondary); font-size: 1rem; border: 1px solid var(--color-border);
+      transition: background 0.2s, opacity 0.5s, display 0.s;
+    }
+    .welcome-message kbd {
+        background-color: var(--color-surface); border: 1px solid var(--color-border);
+        border-radius: 4px; padding: 2px 6px; font-family: var(--font-mono);
+        font-size: 0.85em; box-shadow: var(--shadow-sm);
+    }
+
+    section.card {
+      background: var(--color-surface); padding: var(--spacing-xl);
+      border-radius: var(--border-radius); box-shadow: var(--shadow-md);
+      border: 1px solid var(--color-border); transition: var(--transition);
+      position: relative; overflow: hidden;
+    }
+    .card:focus-within, .card:focus-visible {
+      box-shadow: var(--shadow-lg); border-color: var(--color-primary);
+      outline: 2px solid var(--color-primary); outline-offset: 2px;
+    }
+    .card:hover {
+      box-shadow: var(--shadow-lg);
+      border-color: color-mix(in srgb, var(--color-primary) 40%, var(--color-border));
+    }
+
+    .card-title {
+      font-size: 1.3rem; font-weight: 600; color: var(--color-text-primary);
+      margin: 0 0 var(--spacing-lg) 0; display: flex; align-items: center; gap: var(--spacing-sm);
+      justify-content: space-between;
+    }
+    .card-title-text { display: flex; align-items: center; gap: var(--spacing-sm); }
+    .card-title-text::before {
+      content: ''; width: 4px; height: 20px;
+      background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+      border-radius: 2px;
+    }
+    .mode-toggle-btn {
+        font-size: 0.85rem;
+        padding: var(--spacing-xs) var(--spacing-sm);
+    }
+
+    .form-group { margin-bottom: var(--spacing-lg); }
+    .form-row {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: var(--spacing-md); margin-bottom: var(--spacing-lg);
+    }
+
+    label {
+      display: block; margin-bottom: var(--spacing-sm); font-weight: 500;
+      color: var(--color-text-primary); font-size: 0.9rem; cursor: pointer;
+    }
+    input[type="password"] { font-family: var(--font-mono); letter-spacing: 0.1em;}
+
+    input, select, textarea {
+      width: 100%; padding: var(--spacing-sm) var(--spacing-md);
+      border: 1px solid var(--color-border); border-radius: var(--border-radius-sm);
+      font-family: var(--font-family); font-size: 0.95rem;
+      background: var(--color-surface); color: var(--color-text-primary);
+      transition: var(--transition);
+    }
+    input:focus-visible, select:focus-visible, textarea:focus-visible {
+      outline: 2px solid var(--color-primary); outline-offset: 2px;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 20%, transparent);
+    }
+    textarea { resize: vertical; min-height: 150px; font-family: var(--font-mono); line-height: 1.5; }
+
+    .input-group { display: flex; gap: var(--spacing-sm); align-items: flex-end; }
+    .input-group input { flex: 1; }
+    .input-group button { white-space: nowrap; }
+
+    button {
+      background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+      color: white; border: none; padding: var(--spacing-md) var(--spacing-lg);
+      border-radius: var(--border-radius-sm); font-family: var(--font-family);
+      font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: var(--transition);
+      box-shadow: var(--shadow-sm); display: inline-flex; align-items: center;
+      justify-content: center; gap: var(--spacing-sm);
+    }
+    button:hover:not([disabled]) {
+      background: linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-primary) 100%);
+      box-shadow: var(--shadow-md); transform: translateY(-1px);
+    }
+    button:active:not([disabled]) { transform: translateY(0px); box-shadow: var(--shadow-sm); }
+    button:focus-visible {
+        outline: 2px solid var(--color-primary); outline-offset: 2px;
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 30%, transparent);
+    }
+    button[disabled] { opacity: 0.6; cursor: not-allowed; background: var(--color-text-muted); }
+
+    .btn-secondary { background: var(--color-secondary); color: white; }
+    .btn-secondary:hover:not([disabled]) {
+      background: linear-gradient(135deg, var(--color-secondary) 0%, var(--color-secondary-dark) 100%);
+    }
+    .btn-danger { background: var(--color-error); color: white; }
+    .btn-danger:hover:not([disabled]) { background: color-mix(in srgb, var(--color-error) 80%, black); }
+    .btn-outline {
+        background: transparent; border: 1px solid var(--color-border);
+        color: var(--color-text-primary);
+    }
+    .btn-outline:hover:not([disabled]) {
+        background: var(--color-surface-variant); border-color: var(--color-text-muted);
+    }
+
+    .theme-selector {
+      display: flex; align-items: center; gap: var(--spacing-md);
+      flex-wrap: wrap; margin-bottom: var(--spacing-sm);
+    }
+    input[type="color"] {
+      width: 40px; height: 40px; padding: 2px; border-radius: var(--border-radius-sm);
+      cursor: pointer; border: 1px solid var(--color-border); background-color: var(--color-surface);
+    }
+    #toggleDarkMode { padding: var(--spacing-sm) var(--spacing-md); font-size: 0.9rem; }
+
+    .status-indicator {
+      padding: var(--spacing-sm) var(--spacing-md); border-radius: var(--border-radius-sm);
+      text-align: center; font-weight: 500; margin: var(--spacing-md) 0;
+      transition: background 0.2s, color 0.2s, opacity 0.3s, transform 0.3s;
+      opacity: 0; transform: translateY(10px); display: none;
+      align-items: center; justify-content: center; gap: var(--spacing-sm);
+    }
+    .status-indicator.show { display: flex; opacity: 1; transform: translateY(0); }
+    .status-processing { background: var(--color-primary-light); color: white; border: 1px solid var(--color-primary); }
+    .dark-mode .status-processing { background: color-mix(in srgb, var(--color-primary) 60%, var(--color-surface)); color: var(--color-text-primary); }
+    .status-success { background: var(--color-success); color: white; border: 1px solid color-mix(in srgb, var(--color-success) 80%, black); }
+    .dark-mode .status-success { background: color-mix(in srgb, var(--color-success) 60%, var(--color-surface)); color: var(--color-text-primary); }
+    .status-error { background: var(--color-error); color: white; border: 1px solid color-mix(in srgb, var(--color-error) 80%, black); }
+    .dark-mode .status-error { background: color-mix(in srgb, var(--color-error) 60%, var(--color-surface)); color: var(--color-text-primary); }
+    .status-warning { background: var(--color-warning); color: var(--color-text-primary); border: 1px solid color-mix(in srgb, var(--color-warning) 80%, black); }
+    .dark-mode .status-warning { background: color-mix(in srgb, var(--color-warning) 70%, var(--color-surface)); color: var(--color-text-primary); }
+
+    .result-container {
+      background: var(--color-surface-variant); border-radius: var(--border-radius-sm);
+      overflow: hidden; position: relative; border: 1px solid var(--color-border);
+    }
+    .result-content {
+      padding: var(--spacing-lg); max-height: 400px; overflow-y: auto;
+      font-family: var(--font-mono); line-height: 1.6; white-space: pre-wrap;
+      word-wrap: break-word; color: var(--color-text-primary); min-height: 100px;
+    }
+    .result-content strong { font-weight: bold; } .result-content em { font-style: italic; }
+    .result-content ul, .result-content ol { margin-left: var(--spacing-lg); padding-left: var(--spacing-md); }
+    .result-content li { margin-bottom: var(--spacing-xs); }
+    .result-content pre {
+        background-color: var(--color-background); border: 1px solid var(--color-border);
+        border-radius: var(--border-radius-sm); padding: var(--spacing-md);
+        overflow-x: auto; font-family: var(--font-mono);
+    }
+    .result-content code:not(pre > code) {
+        background-color: var(--color-surface-variant); padding: 0.2em 0.4em; margin: 0;
+        font-size: 85%; border-radius: 3px; font-family: var(--font-mono);
+    }
+    .result-content h1, .result-content h2, .result-content h3 { margin-top: var(--spacing-lg); margin-bottom: var(--spacing-sm); }
+    .result-content h1 { font-size: 1.5em; } .result-content h2 { font-size: 1.3em; } .result-content h3 { font-size: 1.1em; }
+
+    #output::-webkit-scrollbar, #thinkingDisplay::-webkit-scrollbar, #originalResponseDisplay::-webkit-scrollbar, #promptDisplay::-webkit-scrollbar { width: 10px; }
+    #output::-webkit-scrollbar-thumb, #thinkingDisplay::-webkit-scrollbar-thumb, #originalResponseDisplay::-webkit-scrollbar-thumb, #promptDisplay::-webkit-scrollbar-thumb {
+        background: var(--color-text-muted); border-radius: var(--border-radius-sm);
+    }
+    #output::-webkit-scrollbar-track, #thinkingDisplay::-webkit-scrollbar-track, #originalResponseDisplay::-webkit-scrollbar-track, #promptDisplay::-webkit-scrollbar-track {
+        background: var(--color-border-light);
+    }
+
+    .copy-result-btn {
+      position: absolute; top: var(--spacing-sm); right: var(--spacing-sm);
+      background: var(--color-accent); color: white; font-size: 0.8rem;
+      border-radius: var(--border-radius-sm); padding: var(--spacing-xs) var(--spacing-sm);
+      border: none; cursor: pointer; box-shadow: var(--shadow-sm);
+      transition: background 0.2s, transform 0.1s; z-index: 2; opacity: 0.7;
+    }
+    .copy-result-btn:hover, .copy-result-btn:focus-visible { background: var(--color-primary-dark); opacity: 1; }
+    .copy-result-btn:active { transform: scale(0.95); }
+
+    .collapsible { border: 1px solid var(--color-border); border-radius: var(--border-radius-sm); overflow: hidden; margin-bottom: var(--spacing-md);}
+    .collapsible-header {
+      background: var(--color-surface-variant); padding: var(--spacing-sm) var(--spacing-md);
+      cursor: pointer; display: flex; justify-content: space-between; align-items: center;
+      font-weight: 600; color: var(--color-text-primary); transition: var(--transition); user-select: none;
+    }
+    .collapsible-header:hover { background: color-mix(in srgb, var(--color-primary) 5%, var(--color-surface-variant));}
+    .collapsible-header:focus-visible { outline: 2px solid var(--color-primary); outline-offset: -2px; }
+    .collapsible-arrow { transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); font-size: 1rem; }
+    .collapsible-header.open .collapsible-arrow { transform: rotate(90deg); }
+    .collapsible-content { display: none; padding: var(--spacing-md); background: var(--color-surface); }
+    .collapsible-content.open { display: block; }
+
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: var(--spacing-md); margin: var(--spacing-lg) 0;}
+    .stat-card { background: var(--color-surface-variant); padding: var(--spacing-md); border-radius: var(--border-radius-sm); text-align: center; border: 1px solid var(--color-border);}
+    .stat-value { font-size: 1.75rem; font-weight: 700; color: var(--color-primary); display: block; margin-bottom: var(--spacing-xs);}
+    .stat-label { font-size: 0.75rem; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.05em;}
+
+    .loading-spinner {
+      display: inline-block; width: 1em; height: 1em; border: 2px solid #ffffff40;
+      border-radius: 50%; border-top-color: #ffffff; animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {to {transform: rotate(360deg);}}
+
+    .fade-in {animation: fadeIn 0.5s ease-in-out forwards;}
+    @keyframes fadeIn {from {opacity: 0; transform: translateY(10px);} to {opacity: 1; transform: translateY(0);}}
+
+    .timers-container {
+        font-size: 0.85rem;
+        color: var(--color-text-secondary);
+        margin-top: var(--spacing-md);
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: var(--spacing-sm);
+    }
+    .timers-container span { 
+      padding: var(--spacing-xs) var(--spacing-sm); 
+      background: var(--color-surface-variant); 
+      border-radius: var(--border-radius-sm); 
+      border: 1px solid var(--color-border);
+      flex-grow: 1; /* Faz os spans ocuparem espaço disponível */
+      text-align: center; /* Centraliza o texto dentro do span */
+    }
+
+
+    .custom-format-rule {
+        display: grid; grid-template-columns: 1fr 1fr 100px auto; /* Ajuste para flags */
+        gap: var(--spacing-sm);
+        align-items: center; margin-bottom: var(--spacing-sm); padding: var(--spacing-sm);
+        border: 1px solid var(--color-border-light); border-radius: var(--border-radius-sm);
+    }
+    .custom-format-rule input[type="text"] { margin-bottom: 0; }
+
+    .api-key-warning { font-size: 0.8rem; color: var(--color-text-muted); margin-top: var(--spacing-xs); }
+
+    hr.divider {
+      border: none; border-top: 1px solid var(--color-border); margin: var(--spacing-lg) 0;
+    }
+
+    @media (max-width: 768px) {
+      main.page-container { padding: var(--spacing-lg) var(--spacing-md);}
+      .header h1 { font-size: 2.25rem;}
+      section.card { padding: var(--spacing-lg);}
+      .form-row { grid-template-columns: 1fr;}
+      .theme-selector { flex-direction: column; align-items: flex-start;}
+      .theme-selector button { width: 100%; margin-top: var(--spacing-xs); }
+      .stats-grid { grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));}
+      .custom-format-rule { grid-template-columns: 1fr; } /* Stack em mobile */
+      .custom-format-rule input[type="text"] { margin-bottom: var(--spacing-xs); }
+      .custom-format-rule button { margin-top: var(--spacing-xs); width: 100%; }
+      .timers-container { flex-direction: column; align-items: stretch; } /* Stack timers */
+      .timers-container span { margin-bottom: var(--spacing-xs); }
+    }
+
+    ::-webkit-scrollbar { width: 12px; height: 12px; }
+    ::-webkit-scrollbar-track { background: var(--color-border-light); border-radius: 10px; }
+    ::-webkit-scrollbar-thumb { background: var(--color-text-muted); border-radius: 10px; border: 3px solid var(--color-border-light); }
+    ::-webkit-scrollbar-thumb:hover { background: var(--color-primary); }
+  </style>
+</head>
+<body>
+  <header class="header" role="banner" tabindex="0">
+    <h1>Resumidor Ollama Pro ✨</h1>
+    <p class="subtitle">Processamento inteligente de texto local ou via API</p>
+  </header>
+
+  <main class="page-container" aria-label="Área principal do Resumidor Ollama Pro">
+    <div class="welcome-message fade-in" id="welcomeMsg" tabindex="0" role="alert">
+      👋 Bem-vindo(a)! Personalize a ferramenta e escolha seu modo de processamento.<br>
+      Dica: <kbd>Ctrl</kbd>+<kbd>Enter</kbd> processa o texto. <kbd>Enter</kbd> em campos de adição para adicionar.
+    </div>
+
+    <section class="card fade-in" aria-labelledby="personalizacao-title" tabindex="0">
+      <h2 class="card-title" id="personalizacao-title"><span class="card-title-text">🎨 Personalização & Tema</span></h2>
+      <div class="theme-selector" aria-label="Seletor de tema">
+        <label for="themeColorPicker">Cor principal:</label>
+        <input type="color" id="themeColorPicker" value="#6366f1" aria-label="Escolha a cor principal do tema">
+        <button type="button" id="toggleDarkMode" class="btn-outline" title="Alternar modo escuro/claro">🌒 Modo Escuro</button>
+        <button type="button" id="resetConfigBtn" class="btn-danger" title="Resetar todas as configurações e limpar dados">♻️ Resetar Tudo</button>
+      </div>
+    </section>
+
+    <section class="card fade-in" aria-labelledby="config-title" tabindex="0">
+      <h2 class="card-title" id="config-title">
+        <span class="card-title-text">⚙️ Configurações de Processamento</span>
+        <button type="button" id="toggleProcessingModeBtn" class="btn-outline mode-toggle-btn" title="Alternar modo Local/API">API Mode 🌐</button>
+      </h2>
+
+      <div id="localModeSettings">
+        <p style="font-size:0.9em; color: var(--color-text-secondary); margin-bottom: var(--spacing-md);">Usando Ollama para processamento local.</p>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="modelSelector">Modelo de IA (Ollama):</label>
+            <select id="modelSelector" aria-label="Selecione o modelo de IA Ollama">
+              <option value="">Carregando modelos...</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="newModelName">Adicionar modelo Ollama (Ex: nomedomodelo:tag):</label>
+            <div class="input-group">
+              <input type="text" id="newModelName" placeholder="gemma2:2b, etc." aria-label="Adicionar novo modelo Ollama">
+              <button type="button" id="addModelBtn" class="btn-secondary" title="Adicionar modelo Ollama à lista">Adicionar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="apiModeSettings" style="display: none;">
+        <p style="font-size:0.9em; color: var(--color-text-secondary); margin-bottom: var(--spacing-md);">Usando API do Google Gemini.</p>
+        <div class="form-group">
+            <label for="geminiApiKey">Chave da API Google Gemini:</label>
+            <input type="password" id="geminiApiKey" placeholder="Cole sua API Key aqui" aria-label="Chave da API Google Gemini">
+            <p class="api-key-warning">Sua chave é salva localmente no seu navegador.</p>
+        </div>
+<div class="form-group">
+            <label for="geminiModelSelector">Modelo Gemini:</label>
+            <select id="geminiModelSelector" aria-label="Selecione o modelo Gemini">
+              <optgroup label="Modelos Gemini">
+                <option value="gemini-1.5-flash-latest">Gemini 1.5 Flash (Rápido)</option>
+                <option value="gemini-1.5-pro-latest">Gemini 1.5 Pro (Avançado)</option>
+                <option value="gemini-1.0-pro">Gemini 1.0 Pro (Legado)</option>
+                <option value="gemini-1.5-flash-8b">Gemini 1.5 Flash (8B - Rápido)</option>
+                <option value="gemini-2.0-flash-lite">Gemini 2.0 Flash Lite</option>
+                <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
+                <option value="gemini-2.5-pro-preview-05-06">Gemini 2.5 Pro (Preview 05/06)</option>
+                <option value="gemini-2.5-flash-preview-05-20">Gemini 2.5 Flash (Preview 05/20)</option>
+                <option value="gemini-2.5-flash-preview-04-17">Gemini 2.5 Flash (Preview 04/17)</option>
+              </optgroup>
+              <optgroup label="Modelos Gemma">
+                <option value="gemma-2b-it">Gemma 2B (Instrução)</option>
+                <option value="gemma-7b-it">Gemma 7B (Instrução)</option>
+                <option value="gemma-2-9b-it">Gemma 2 (9B - Instrução)</option>
+                <option value="gemma-2-27b-it">Gemma 2 (27B - Instrução)</option>
+                <option value="gemma-3n-e4b-it">Gemma 3n (4B - Instrução)</option>
+                <option value="codegemma-7b-it">CodeGemma 7B (Instrução)</option>
+                <option value="paligemma-3b-ft">PaliGemma 3B (Visão-Linguagem)</option>
+                </optgroup>
+            </select>
+          </div>
+
+      </div>
+      <hr class="divider">
+      <div class="form-row">
+        <div class="form-group">
+            <label for="taskSelector">Tipo de processamento:</label>
+            <select id="taskSelector" aria-label="Selecione o tipo de processamento">
+              <option value="summarize_concise">📝 Resumo Conciso</option>
+              <option value="summarize_detailed">📋 Resumo Detalhado</option>
+              <option value="bullet_points">🔸 Lista de Pontos Chave</option>
+              <option value="correct_text">✏️ Correção Gramatical</option>
+              <option value="improve_text">✨ Melhoria de Escrita</option>
+              <option value="translate">🌐 Tradução</option>
+              <option value="explain_simple">💡 Explicação Simplificada</option>
+              <option value="custom_prompt">👨‍💻 Prompt Personalizado</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="summaryLanguage">Idioma de saída:</label>
+            <select id="summaryLanguage" aria-label="Selecione o idioma do resultado">
+              <option value="Português">🇧🇷 Português</option>
+              <option value="Inglês">🇺🇸 Inglês</option>
+              <option value="Espanhol">🇪🇸 Espanhol</option>
+              <option value="Francês">🇫🇷 Francês</option>
+              <option value="como no texto original">🔄 Manter original</option>
+            </select>
+          </div>
+      </div>
+      <div class="form-group" id="customPromptContainer" style="display: none;">
+        <label for="customPromptText">Seu prompt personalizado (use `{{TEXTO}}` para o texto de entrada e `{{IDIOMA}}` para o idioma de saída):</label>
+        <textarea id="customPromptText" placeholder="Ex: Resuma o {{TEXTO}} em três frases no idioma {{IDIOMA}}." aria-label="Prompt personalizado"></textarea>
+      </div>
+      <div class="form-group">
+        <label for="newLanguageInput">Adicionar idioma (Ex: Japonês):</label>
+        <div class="input-group">
+          <input type="text" id="newLanguageInput" placeholder="Nome do Idioma" aria-label="Adicionar novo idioma">
+          <button type="button" id="addLanguageBtn" class="btn-secondary" title="Adicionar idioma à lista">Adicionar</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="card fade-in" aria-labelledby="entrada-title" tabindex="0">
+      <h2 class="card-title" id="entrada-title"><span class="card-title-text">📝 Texto de Entrada</span></h2>
+      <div class="form-group">
+        <textarea id="inputText" placeholder="Cole seu texto aqui para processamento... (Ctrl+Enter para processar)" aria-label="Campo para texto de entrada">O Termux é um emulador de terminal para Android e um ambiente Linux. <think>Analisando Termux: é um app para Android que simula um terminal Linux.</think> Ollama permite rodar LLMs localmente. <think>Conectando com Ollama: Ollama é uma ferramenta para executar modelos de linguagem grandes no próprio computador.</think> A API do Gemini é uma alternativa na nuvem, oferecida pelo Google.</textarea>
+      </div>
+      <div class="stats-grid" aria-label="Estatísticas do texto de entrada">
+        <div class="stat-card"><span class="stat-value" id="charCount">0</span><span class="stat-label">Caracteres</span></div>
+        <div class="stat-card"><span class="stat-value" id="wordCount">0</span><span class="stat-label">Palavras</span></div>
+        <div class="stat-card"><span class="stat-value" id="lineCount">0</span><span class="stat-label">Linhas</span></div>
+      </div>
+      <button type="button" id="runBtn" aria-label="Processar texto">
+        <span id="runBtnSpinner" class="loading-spinner" style="display: none;"></span>
+        <span id="runBtnText">🚀 Processar Texto</span>
+      </button>
+      <div class="timers-container">
+          <span id="ttftDisplay">TTFT: -</span>
+          <span id="thinkTimeDisplay">T. Raciocínio: -</span>
+          <span id="totalTimeDisplay">T. Total: -</span>
+      </div>
+      <div id="statusIndicator" class="status-indicator" role="status" aria-live="polite"></div>
+    </section>
+
+    <section class="card fade-in" aria-labelledby="resultado-title" tabindex="0">
+      <h2 class="card-title" id="resultado-title"><span class="card-title-text">✨ Resultado Processado</span></h2>
+      <div class="form-group">
+        <label for="outputFormatter">Formatação da Saída:</label>
+        <select id="outputFormatter" aria-label="Selecione o tipo de formatação para o resultado">
+            <option value="none">Nenhuma</option>
+            <option value="markdown">Markdown para HTML (Básico)</option>
+            <option value="clean_spaces">Limpar Espaços Extras</option>
+            <option value="custom">Formatação Customizada</option>
+        </select>
+      </div>
+      <div id="customFormattingRulesContainer" style="display: none;">
+        <label>Regras de Formatação Customizada (Localizar Regex / Substituir / Flags):</label>
+        <div id="customRulesList"></div>
+        <button type="button" id="addCustomRuleBtn" class="btn-secondary" style="margin-top: var(--spacing-sm);">+ Adicionar Regra</button>
+      </div>
+      <div class="result-container">
+        <button type="button" id="copyResultBtn" class="copy-result-btn" aria-label="Copiar resultado bruto" title="Copiar resultado bruto">📋 Copiar</button>
+        <div class="result-content" id="output" aria-live="polite" data-raw-output="Seu resultado aparecerá aqui...">Seu resultado aparecerá aqui...</div>
+      </div>
+    </section>
+
+    <section class="card fade-in" tabindex="0" aria-labelledby="detalhes-title">
+        <h2 class="card-title" id="detalhes-title"><span class="card-title-text">🔍 Detalhes da Geração</span></h2>
+        <div class="collapsible">
+            <div class="collapsible-header" id="thinkingHeader" tabindex="0" role="button" aria-expanded="false" aria-controls="thinkingContentContainer">
+                <span>🧠 Raciocínio Interno da IA (Think)</span>
+                <span class="collapsible-arrow">▶</span>
+            </div>
+            <div class="collapsible-content" id="thinkingContentContainer" role="region" aria-labelledby="thinkingHeader">
+                <div class="result-content" id="thinkingDisplay">Nenhum "pensamento" (<think>) detectado ainda.</div>
+            </div>
+        </div>
+        <div class="collapsible">
+            <div class="collapsible-header" id="promptHeader" tabindex="0" role="button" aria-expanded="false" aria-controls="promptContent">
+            <span>📝 Prompt Enviado</span>
+            <span class="collapsible-arrow">▶</span>
+            </div>
+            <div class="collapsible-content" id="promptContent" role="region" aria-labelledby="promptHeader">
+            <div class="result-content" id="promptDisplay">O prompt enviado aparecerá aqui.</div>
+            </div>
+        </div>
+        <div class="collapsible">
+            <div class="collapsible-header" id="originalResponseHeader" tabindex="0" role="button" aria-expanded="false" aria-controls="originalResponseContent">
+            <span>📄 Resposta Completa (JSON)</span>
+            <span class="collapsible-arrow">▶</span>
+            </div>
+            <div class="collapsible-content" id="originalResponseContent" role="region" aria-labelledby="originalResponseHeader">
+            <div class="result-content" id="originalResponseDisplay">A resposta JSON completa da IA aparecerá aqui.</div>
+            </div>
+        </div>
+    </section>
+  </main>
+
+  <script src="script.js" type="text/javascript" charset="utf-8"></script>
+</body>
+</html>
