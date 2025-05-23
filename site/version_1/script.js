@@ -1,47 +1,30 @@
 document.addEventListener('DOMContentLoaded', () => {
-  const elements = {
-    inputText: document.getElementById('inputText'),
-    output: document.getElementById('output'),
-    statusIndicator: document.getElementById('statusIndicator'),
-    runBtn: document.getElementById('runBtn'),
-    runBtnText: document.getElementById('runBtnText'),
-    runBtnSpinner: document.getElementById('runBtnSpinner'),
-    modelSelector: document.getElementById('modelSelector'),
-    taskSelector: document.getElementById('taskSelector'),
-    summaryLanguage: document.getElementById('summaryLanguage'),
-    newModelName: document.getElementById('newModelName'),
-    addModelBtn: document.getElementById('addModelBtn'),
-    newLanguageInput: document.getElementById('newLanguageInput'),
-    addLanguageBtn: document.getElementById('addLanguageBtn'),
-    thinkingDisplay: document.getElementById('thinkingDisplay'),
-    promptDisplay: document.getElementById('promptDisplay'),
-    originalResponseDisplay: document.getElementById('originalResponseDisplay'),
-    themeColorPicker: document.getElementById('themeColorPicker'),
-    resetConfigBtn: document.getElementById('resetConfigBtn'),
-    toggleDarkModeBtn: document.getElementById('toggleDarkMode'),
-    charCount: document.getElementById('charCount'),
-    wordCount: document.getElementById('wordCount'),
-    lineCount: document.getElementById('lineCount'),
-    copyResultBtn: document.getElementById('copyResultBtn'),
-    customPromptContainer: document.getElementById('customPromptContainer'),
-    customPromptText: document.getElementById('customPromptText'),
-    welcomeMsg: document.getElementById('welcomeMsg'),
-    ttftDisplay: document.getElementById('ttftDisplay'),
-    thinkTimeDisplay: document.getElementById('thinkTimeDisplay'),
-    totalTimeDisplay: document.getElementById('totalTimeDisplay'),
-    outputFormatter: document.getElementById('outputFormatter'),
-    customFormattingRulesContainer: document.getElementById('customFormattingRulesContainer'),
-    customRulesList: document.getElementById('customRulesList'),
-    addCustomRuleBtn: document.getElementById('addCustomRuleBtn'),
-    toggleProcessingModeBtn: document.getElementById('toggleProcessingModeBtn'),
-    localModeSettings: document.getElementById('localModeSettings'),
-    apiModeSettings: document.getElementById('apiModeSettings'),
-    geminiApiKey: document.getElementById('geminiApiKey'),
-    geminiModelSelector: document.getElementById('geminiModelSelector'),
-    thinkingHeader: document.getElementById('thinkingHeader'),
-    promptHeader: document.getElementById('promptHeader'),
-    originalResponseHeader: document.getElementById('originalResponseHeader')
-  };
+  // Lista de IDs dos elementos usados
+  const elementIds = [
+    'inputText', 'output', 'statusIndicator', 'runBtn', 'runBtnText', 'runBtnSpinner',
+    'modelSelector', 'taskSelector', 'summaryLanguage', 'newModelName', 'addModelBtn',
+    'newLanguageInput', 'addLanguageBtn', 'thinkingDisplay', 'promptDisplay',
+    'originalResponseDisplay', 'themeColorPicker', 'resetConfigBtn', 'toggleDarkMode',
+    'charCount', 'wordCount', 'lineCount', 'copyResultBtn', 'customPromptContainer',
+    'customPromptText', 'welcomeMsg', 'ttftDisplay', 'thinkTimeDisplay', 'totalTimeDisplay',
+    'outputFormatter', 'customFormattingRulesContainer', 'customRulesList', 'addCustomRuleBtn',
+    'toggleProcessingModeBtn', 'localModeSettings', 'apiModeSettings', 'geminiApiKey',
+    'geminiModelSelector', 'thinkingHeader', 'promptHeader', 'originalResponseHeader'
+  ];
+  const elements = {};
+  elementIds.forEach(id => elements[id] = document.getElementById(id));
+
+  // Função utilitária para remover opções customizadas de um select
+  function removeCustomOptions(select) {
+    select.querySelectorAll('option[data-custom="true"]').forEach(opt => opt.remove());
+  }
+
+  // Função utilitária para atualizar config e salvar
+  function updateConfigAndSave(key, value) {
+    config[key] = value;
+    saveConfig();
+    applyUiFromConfig();
+  }
 
   const OLLAMA_API_BASE_URL = typeof OLLAMA_HOST !== 'undefined' ? OLLAMA_HOST.replace(/\/$/, '') : (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:11434' : '');
   const GEMINI_API_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta/models';
@@ -118,7 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
     elements.geminiModelSelector.value = config.selectedGeminiModel;
 
     // Clear existing custom options before repopulating to avoid duplicates on re-apply
-    elements.summaryLanguage.querySelectorAll('option[data-custom="true"]').forEach(opt => opt.remove());
+    removeCustomOptions(elements.summaryLanguage);
     populateSelectWithOptions(elements.summaryLanguage, config.customLanguages, false, true);
     // Ensure selectedLanguage is still valid
     if (!Array.from(elements.summaryLanguage.options).some(o => o.value === config.selectedLanguage)) {
@@ -144,7 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
         fetchOllamaModels();
       } else {
         // Models are loaded, ensure selection is correct
-        elements.modelSelector.querySelectorAll('option[data-custom="true"]').forEach(opt => opt.remove());
+        removeCustomOptions(elements.modelSelector);
         populateSelectWithOptions(elements.modelSelector, config.customModels, true, true);
         if (config.selectedModel && Array.from(modelOptions).some(o => o.value === config.selectedModel)) {
           elements.modelSelector.value = config.selectedModel;
@@ -633,20 +616,26 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // Função utilitária para fade-out da mensagem de boas-vindas
+  function fadeOutWelcomeMsg() {
+    if (elements.welcomeMsg.style.display !== 'none') {
+      elements.welcomeMsg.style.opacity = '0';
+      setTimeout(() => { elements.welcomeMsg.style.display = 'none'; }, 500);
+    }
+  }
+
   // --- Event Listeners ---
-  elements.themeColorPicker.addEventListener('input', (e) => { config.themeColor = e.target.value; applyUiFromConfig(); });
-  elements.themeColorPicker.addEventListener('change', saveConfig);
-  elements.toggleDarkModeBtn.addEventListener('click', () => { config.darkMode = !config.darkMode; applyUiFromConfig(); saveConfig(); });
+  elements.themeColorPicker.addEventListener('input', (e) => updateConfigAndSave('themeColor', e.target.value));
+  elements.toggleDarkModeBtn.addEventListener('click', () => { config.darkMode = !config.darkMode; updateConfigAndSave('darkMode', config.darkMode); });
   elements.resetConfigBtn.addEventListener('click', resetConfig);
 
   elements.toggleProcessingModeBtn.addEventListener('click', () => {
     config.processingMode = (config.processingMode === 'local') ? 'api' : 'local';
-    applyUiFromConfig();
-    saveConfig();
+    updateConfigAndSave('processingMode', config.processingMode);
   });
 
-  elements.geminiApiKey.addEventListener('input', (e) => { config.geminiApiKey = e.target.value; saveConfig(); });
-  elements.geminiModelSelector.addEventListener('change', (e) => { config.selectedGeminiModel = e.target.value; saveConfig(); });
+  elements.geminiApiKey.addEventListener('input', (e) => updateConfigAndSave('geminiApiKey', e.target.value));
+  elements.geminiModelSelector.addEventListener('change', (e) => updateConfigAndSave('selectedGeminiModel', e.target.value));
 
   elements.addModelBtn.addEventListener('click', () => {
     const newModel = elements.newModelName.value.trim();
@@ -655,7 +644,8 @@ document.addEventListener('DOMContentLoaded', () => {
         config.customModels.push(newModel);
         populateSelectWithOptions(elements.modelSelector, [newModel], true, true);
         elements.modelSelector.value = newModel; config.selectedModel = newModel;
-        saveConfig(); elements.newModelName.value = '';
+        updateConfigAndSave('customModels', config.customModels);
+        elements.newModelName.value = '';
         updateStatus(`Modelo Ollama "${newModel}" adicionado à lista.`, "success");
       } else { updateStatus(`Modelo Ollama "${newModel}" já existe na lista ou é um modelo base.`, "warning"); }
     } else { updateStatus("Nome do modelo Ollama não pode ser vazio.", "warning"); }
@@ -669,22 +659,27 @@ document.addEventListener('DOMContentLoaded', () => {
         config.customLanguages.push(newLang);
         populateSelectWithOptions(elements.summaryLanguage, [newLang], false, true);
         elements.summaryLanguage.value = newLang; config.selectedLanguage = newLang;
-        saveConfig(); elements.newLanguageInput.value = '';
+        updateConfigAndSave('customLanguages', config.customLanguages);
+        elements.newLanguageInput.value = '';
         updateStatus(`Idioma "${newLang}" adicionado.`, "success");
       } else { updateStatus(`Idioma "${newLang}" já existe.`, "warning"); }
     } else { updateStatus("Nome do idioma não pode ser vazio.", "warning"); }
   });
   elements.newLanguageInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') { e.preventDefault(); elements.addLanguageBtn.click(); } });
 
-  elements.modelSelector.addEventListener('change', (e) => { config.selectedModel = e.target.value; saveConfig(); });
-  elements.taskSelector.addEventListener('change', (e) => { config.selectedTask = e.target.value; elements.customPromptContainer.style.display = (config.selectedTask === 'custom_prompt') ? 'block' : 'none'; saveConfig(); });
-  elements.summaryLanguage.addEventListener('change', (e) => { config.selectedLanguage = e.target.value; saveConfig(); });
-  elements.customPromptText.addEventListener('input', (e) => { config.customPrompt = e.target.value; saveConfig(); });
+  elements.modelSelector.addEventListener('change', (e) => updateConfigAndSave('selectedModel', e.target.value));
+  elements.taskSelector.addEventListener('change', (e) => {
+    config.selectedTask = e.target.value;
+    elements.customPromptContainer.style.display = (config.selectedTask === 'custom_prompt') ? 'block' : 'none';
+    updateConfigAndSave('selectedTask', config.selectedTask);
+  });
+  elements.summaryLanguage.addEventListener('change', (e) => updateConfigAndSave('selectedLanguage', e.target.value));
+  elements.customPromptText.addEventListener('input', (e) => updateConfigAndSave('customPrompt', e.target.value));
 
   elements.outputFormatter.addEventListener('change', (e) => {
     config.selectedFormatter = e.target.value;
     elements.customFormattingRulesContainer.style.display = (config.selectedFormatter === 'custom') ? 'block' : 'none';
-    saveConfig();
+    updateConfigAndSave('selectedFormatter', config.selectedFormatter);
     const rawOutput = elements.output.dataset.rawOutput;
     if (rawOutput && rawOutput !== "Seu resultado aparecerá aqui...") {
       const reFormatted = applyFormatting(rawOutput, config.selectedFormatter, config.customFormatRules);
@@ -696,7 +691,11 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
   });
-  elements.addCustomRuleBtn.addEventListener('click', () => { config.customFormatRules.push({ find: '', replace: '', flags: 'gim' }); saveConfig(); renderCustomFormatRules(); });
+  elements.addCustomRuleBtn.addEventListener('click', () => {
+    config.customFormatRules.push({ find: '', replace: '', flags: 'gim' });
+    updateConfigAndSave('customFormatRules', config.customFormatRules);
+    renderCustomFormatRules();
+  });
 
   elements.runBtn.addEventListener('click', initiateProcessing);
   elements.inputText.addEventListener('keydown', (e) => { if (e.ctrlKey && e.key === 'Enter') { e.preventDefault(); initiateProcessing(); } });
@@ -725,16 +724,6 @@ document.addEventListener('DOMContentLoaded', () => {
   updateTextStats();
   loadConfig(); // Carrega e aplica a UI (inclui fetch de modelos Ollama se modo local)
 
-  setTimeout(() => {
-    if (elements.welcomeMsg.style.display !== 'none') {
-      elements.welcomeMsg.style.opacity = '0';
-      setTimeout(() => { elements.welcomeMsg.style.display = 'none'; }, 500);
-    }
-  }, 8000);
-  elements.inputText.addEventListener('focus', () => {
-    if (elements.welcomeMsg.style.display !== 'none') {
-      elements.welcomeMsg.style.opacity = '0';
-      setTimeout(() => { elements.welcomeMsg.style.display = 'none'; }, 500);
-    }
-  }, { once: true });
+  setTimeout(fadeOutWelcomeMsg, 8000);
+  elements.inputText.addEventListener('focus', fadeOutWelcomeMsg, { once: true });
 });
