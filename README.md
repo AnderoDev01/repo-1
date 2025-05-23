@@ -1,7 +1,7 @@
 # Resumidor Ollama Pro ✨
 
 Resumidor Ollama Pro is an intelligent text processing application that allows users to process text using either local Ollama models or the Google Gemini API. It is highly customizable and offers a variety of features for text manipulation and analysis.
-try [src/site/version_2/index.html](web)
+try [site](src/site/version_2/index.html)
 
 ## Key Features
 
